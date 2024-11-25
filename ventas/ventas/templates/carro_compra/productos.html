@@ -1,0 +1,25 @@
+{% extends "carro_compra/base.html" %}
+
+{% block content %}
+
+<title> {% block title %}Lista de productos{% endblock title %}</title>
+    <h1>Productos</h1>
+    <ul>
+        {% for producto in productos %}
+            <li>
+                <form method="POST" action="{% url 'producto_seleccionado' producto.id_producto %}">
+                    {% csrf_token %}
+                    <img src="{{ producto.foto.url }}" alt="{{ producto.nombre_prod }}" style="max-width: 120px;">
+                    ID:     {{producto.id_producto}} <br>
+                    Nombre: {{producto.nombre_prod}} <br>
+                    Precio: {{producto.precio}}      <br>
+                    <br>
+                    <a href="{% url "producto_seleccionado" producto.id_producto %}"><button type="submit">Seleccionar</button></a>
+                </form>
+            </li>
+        <br><br>
+        {% endfor %}
+    </ul>
+
+{% endblock content %}
+</body>

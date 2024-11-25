@@ -1,0 +1,38 @@
+{% extends "carro_compra/base.html" %}
+
+{% block content %}
+<title> {% block title %}Carrito de compras{% endblock title %}</title>
+<h1>Carrito de Compras</h1>
+<a href="{% url 'productos' %}">Volver a Productos</a>
+
+{% if productos_carrito %}
+    <ul>
+        {% for item in productos_carrito %}
+            <li>
+                <img name="fotoP" src="{{ item.producto.foto.url }}" alt="{{ item.producto.nombre_prod }}" style="max-width: 80px;">
+                <span>Producto: </span>{{ item.producto.nombre_prod }} <br>
+                <span>Cantidad: </span>
+                <input type="number" value="{{ item.cant_compra }}" id="cantidad_{{ item.id }}" name="cantidad_{{ item.id }}" readonly>
+                <br>
+                <span>Precio Unitario: $</span>{{ item.producto.precio }} <br>
+                <span>Subtotal: $</span><span id="subtotal_{{ item.id }}">{{ item.subtotal }}</span> <br>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <br>
+    <h3>Total Carrito: $<span id="total_carrito">{{ total_carrito }}</span></h3>
+
+    <br>
+    <form action="{% url 'pagar_compra' %}" method="post">
+        {% csrf_token %}
+        {% if request.session.user %}
+            <button type="submit" class="btn btn-success">Pagar Compra</button>
+        {% else %}
+            <a href="{% url 'login' %}">Inicia sesión para pagar la compra</a>
+        {% endif %}
+    </form>
+{% else %}
+    <p>Tu carrito está vacío.</p>
+{% endif %}
+{% endblock content %}

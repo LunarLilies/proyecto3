@@ -1,0 +1,12 @@
+{% extends 'carro_compra/base.html' %}
+
+{% block content %}
+<title> {% block title %}Compra exitosa{% endblock title %}</title>
+<h1>¡Compra Exitosa!</h1>
+<p>Gracias por tu compra. Aquí está el resumen:</p>
+
+<p><strong>Fecha de compra:</strong> {{ venta.fecha }}</p>
+<p><strong>Total Pagado:</strong> ${{ venta.total }}</p>
+
+<a href="{% url 'productos' %}" class="btn btn-primary">Volver a lista de productos</a>
+{% endblock %}

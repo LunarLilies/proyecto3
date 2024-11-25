@@ -1,0 +1,49 @@
+{% extends "carro_compra/productos.html" %}
+
+{% block content %}
+<title> {% block title %}Detalles de producto{% endblock title %}</title>
+    <h1>Detalles Producto:</h1>
+    <br>
+    <h2>{{ producto.nombre_prod }}</h2>
+    <br>
+    <div>
+        <form action="{% url 'agregar_carrito' %}" method="POST">
+            {% csrf_token %}
+        <img name="fotoP" src="{{ producto.foto.url }}" alt="{{ producto.nombre_prod }}" style="max-width: 150px;">
+    
+        <span>ID:</span> {{ producto.id_producto }} 
+        <input name="id_producto" type="hidden" value="{{ producto.id_producto }}" readonly> <br>
+
+        <span>Nombre:</span> {{ producto.nombre_prod }} 
+        <input name="nombre_prod" type="hidden" value="{{ producto.nombre_prod }}" readonly> <br>
+
+        <span>Stock:</span> {{ producto.stock }} 
+        <input name="stock" type="hidden" value="{{ producto.stock }}" readonly> <br>
+
+        <span>Descripción:</span> {{ producto.descripcion }} 
+        <input name="descripcion" type="hidden" value="{{ producto.descripcion }}" readonly> <br>
+
+        Cantidad:       <input type="number" id="cantidad" name="cantidad" value="1" min="1" max="{{ producto.stock }}" oninput="calcularSubtotal()">
+        <br>
+        Precio Unidad:  <input type="text" name="precio" value="{{ producto.precio }}" readonly> <br>
+        <br>
+        <span>Total:    </span><input name="subtotal" type="text" id="subtotal" value="{{ producto.precio }}" readonly>
+        <br>
+        <br>
+        <button name="agregar_carrito" type="submit">Agregar al carrito</button>
+        </form>
+        <br>
+    </div>
+    <br><a href="{% url 'productos' %}"><button>Volver atrás</button></a>
+
+
+<script>
+    function calcularSubtotal() {
+        var cantidad = document.getElementById("cantidad").value;
+        var precio = {{ producto.precio }};
+        var subtotal = cantidad * precio;
+        document.getElementById("subtotal").value = subtotal.toFixed(2);
+    }
+</script>
+
+{% endblock content %}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> {% block title %}Inicio{% endblock title %}</title>
+</head>
+<body>
+    <nav>
+        <li class="nav-item dropdown">
+            <a href="{% url 'base' %}">Inicio</a>
+            <a href="{% url 'productos' %}">Productos</a>
+            <a href="{% url 'carrito' %}">Carrito</a>
+            {% if request.session.user %}
+                <a href="{% url 'cerrar_sesion' %}">Cerrar sesión</a>
+            {% else %}
+                <a href="{% url 'login' %}">Iniciar sesión</a>
+            {% endif %}
+        </li>
+    </nav>
+    <h1>Página de inicio</h1>
+    {% block content %}
+    
+    {% endblock content %}
+</body>
+</html>
