@@ -3,13 +3,21 @@
 {% block content %}
 <title> {% block title %}Iniciar sesión{% endblock title %}</title>
 <body>
-    <h1>Iniciar sesión</h1> <br>
-    <form action="{% url 'validar_login' %}" method="POST">
+    <h2>Login</h2>
+    <form method="post" action="{% url 'login_html' %}">
         {% csrf_token %}
-        Nombre de usuario: <input type="text" name="nom_usuario" id="nom_usuario"> <br>
-        Contraseña: <input type="password" name="contraseña" id="contraseña"> <br>
-        <input type="submit" name="opcion" value="Iniciar sesión">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        
+        <button type="submit">Login</button>
     </form>
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
 
+    <p>¿No estas registrado? <a href="{% url 'registro' %}">Registrate aquí</a></p>
 </body>
 {% endblock content %}

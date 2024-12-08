@@ -16,6 +16,10 @@
                 <br>
                 <span>Precio Unitario: $</span>{{ item.producto.precio }} <br>
                 <span>Subtotal: $</span><span id="subtotal_{{ item.id }}">{{ item.subtotal }}</span> <br>
+                <form method="post" action="{% url 'quitar_del_carro' item.producto.id_producto %}">
+                    {% csrf_token %}
+                    <button type="submit">Eliminar</button>
+                </form>
             </li>
         {% endfor %}
     </ul>
@@ -26,10 +30,10 @@
     <br>
     <form action="{% url 'pagar_compra' %}" method="post">
         {% csrf_token %}
-        {% if request.session.user %}
+        {% if user.is_authenticated %}
             <button type="submit" class="btn btn-success">Pagar Compra</button>
         {% else %}
-            <a href="{% url 'login' %}">Inicia sesión para pagar la compra</a>
+            <a href="{% url 'login_html' %}">Inicia sesión para pagar la compra</a>
         {% endif %}
     </form>
 {% else %}

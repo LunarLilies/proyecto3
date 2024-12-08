@@ -1,7 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Producto, Carrito, CarritoProducto, Usuario, Venta, DetalleVenta
+from .models import Producto, Carrito, CarritoProducto, Venta, DetalleVenta
+from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model, authenticate, login as auth_login, logout
+from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from datetime import datetime
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import LoginSerializer
+
 
 # Create your views here.
 def base(request):
@@ -82,6 +90,11 @@ def agregar_carrito(request):
     return render(request, 'carro_compra/carrito.html', {'productos_carrito': productos_carrito, 'total_carrito': total_carrito})
 
 
+from django.contrib.auth.models import User
+from django.shortcuts import render, redirect
+from carro_compra.models import CarritoProducto, Venta, DetalleVenta
+from datetime import datetime
+
 def pagar_compra(request):
     if request.method == "POST":
         productos_carrito = CarritoProducto.objects.all()
@@ -89,13 +102,10 @@ def pagar_compra(request):
         if not productos_carrito.exists():
             return redirect('carrito')
 
-        user_session = request.session.get("user")
-        usuario = None
-        if user_session:
-            try:
-                usuario = Usuario.objects.get(nom_usuario=user_session.split()[0])
-            except Usuario.DoesNotExist:
-                pass
+        if request.user.is_authenticated:
+            usuario = request.user
+        else:
+            usuario = None
 
         total_compra = sum(item.subtotal for item in productos_carrito)
 
@@ -125,12 +135,11 @@ def pagar_compra(request):
             )
 
         productos_carrito.delete()
-
         return render(request, 'carro_compra/compra_exitosa.html', {'venta': venta})
 
 
 def compra_exitosa(request):
-    return redirect(request, 'carro_compra/compra_exitosa.html')
+    return render(request, 'carro_compra/compra_exitosa.html')
 
 
 #------------------------    SECCIÓN DE LOGUEO    ----------------------
@@ -139,36 +148,101 @@ def login(request):
     return render(request, "carro_compra/login.html", context)
 
 
-def validar_login(request):
-    print("Estoy en validar login")
-    context = {}
-    
-    if request.method == "POST":
-        print("Ingreso al POST")
+class LoginView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data
+            return Response({
+                "message": "Login exitoso",
+                "username": user.username,
+                "email": user.email,
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        nom_usuario = request.POST["nom_usuario"]
-        contraseña = request.POST["contraseña"]
 
-        try:
-            usuario = Usuario.objects.get(nom_usuario=nom_usuario)
-            if usuario.contraseña == contraseña:
-                request.session["user"] = f"{usuario.nombre} {usuario.apellido}"
+
+def login_html_view(request):
+    print("estoy en login_html_view")
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request,username=username, password=password)
+        if user:
+            if user.is_active:
+                auth_login(request, user)
                 return redirect('base')
             else:
-                context['mensaje'] = 'Contraseña incorrecta'
-        except Usuario.DoesNotExist:
-            context['mensaje'] = 'Usuario no encontrado'
-    
-    return render(request, 'carro_compra/login.html', context)
-    
+                error = "Cuenta desactivada."
+        else:
+            error = "Credenciales incorrectas."
 
-def cerrar_sesion(request):
-    print("Hola estoy en cerrar sesión")
-    if "user" in request.session:
-        del request.session["user"]
-        print("sesión cerrada")
-        return render(request, 'carro_compra/cerrar_sesion.html')
-    else:
-        return redirect('base')
-    
+    return render(request, 'carro_compra/login.html', {'error': error})
+
+@login_required
+def logout_html_view(request):
+    logout(request)
+    return render(request, 'carro_compra/logout.html')
+
+
 #------------------------------------------------------
+
+
+def quitar_del_carro(request, id_producto):
+    try:
+        carrito = Carrito.objects.get(activo=True)
+        producto = get_object_or_404(Producto, id_producto=id_producto)
+        carro_producto = CarritoProducto.objects.filter(carrito=carrito, producto=producto).first()
+        
+        if carro_producto:
+            carro_producto.delete()
+            print(f"Producto {id_producto} eliminado del carrito.")
+        else:
+            print(f"Producto {id_producto} no encontrado en el carrito.")
+    except Carrito.DoesNotExist:
+        print("No hay carrito activo.")
+    
+    return redirect('carrito')
+
+
+# ---------- REGISTRO ------------
+
+def registro(request):
+    print("estoy en registro.HTML")
+    return render(request, "carro_compra/registro.html")
+
+from django.contrib.auth.models import User
+from django.shortcuts import render
+
+def registro(request):
+    print("estoy en registro.HTML")
+    return render(request, "carro_compra/registro.html")
+
+
+def validar_registro(request):
+    print("Estoy en validar_registro")
+    context = {}
+    if request.method == "POST":
+        print(request.POST) #imprimir lo del post.
+        
+        username = request.POST.get("username")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        password = request.POST.get("password")
+
+        if not all([username, first_name, last_name, password]):
+            context["error"] = "Por favor, completa todos los campos."
+            return render(request, "carro_compra/registro.html", context)
+
+        nuevo_usuario = User.objects.create_user(
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            password=password
+        )
+        context["mensaje"] = "Usuario registrado con éxito"
+        return render(request, "carro_compra/registro.html", context)
+
+    return render(request, "carro_compra/registro.html", context)
+

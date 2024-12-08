@@ -15,26 +15,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from carro_compra import views
+from django.urls import path, include
 from . import settings
 from django.contrib.staticfiles.urls import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('base/', views.base, name='base'),
-    path('carrito', views.carrito, name='carrito'),
-    path('carro_compra/login', views.login, name='login'),
-    path('producto/<int:id_producto>/', views.producto_seleccionado, name='producto_seleccionado'),
-    path('carro_compra/productos/', views.productos, name='productos'),
-    path('carro_compra/agregar_carrito', views.agregar_carrito, name='agregar_carrito'),
-    path('pagar_compra/', views.pagar_compra, name='pagar_compra'),
-    path('compra_exitosa/', views.compra_exitosa, name='compra_exitosa'),
-    path('login/',views.login,name='login'),
-    path('validar_login', views.validar_login, name='validar_login'),
-    path('cerrar_sesion', views.cerrar_sesion, name='cerrar_sesion'),
-    
+    path('carro_compra/', include('carro_compra.urls')),
+    path('', include('carro_compra.urls')),
 ]
 
 

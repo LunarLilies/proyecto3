@@ -11,16 +11,19 @@
             <a href="{% url 'base' %}">Inicio</a>
             <a href="{% url 'productos' %}">Productos</a>
             <a href="{% url 'carrito' %}">Carrito</a>
-            {% if request.session.user %}
-                <a href="{% url 'cerrar_sesion' %}">Cerrar sesión</a>
+
+            {% if user.is_authenticated %}
+                Sesión iniciada como: {{ user.first_name }} {{user.last_name}}
+                <a href="{% url 'logout_html' %}">Cerrar Sesión</a>
             {% else %}
-                <a href="{% url 'login' %}">Iniciar sesión</a>
+                Usuario anónimo
+                <a href="{% url 'login_html' %}">Iniciar sesión</a>
             {% endif %}
         </li>
     </nav>
-    <h1>Página de inicio</h1>
-    {% block content %}
     
+    {% block content %}
+    <h1>Página de inicio</h1>
     {% endblock content %}
 </body>
 </html>
