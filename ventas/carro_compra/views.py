@@ -90,11 +90,6 @@ def agregar_carrito(request):
     return render(request, 'carro_compra/carrito.html', {'productos_carrito': productos_carrito, 'total_carrito': total_carrito})
 
 
-from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
-from carro_compra.models import CarritoProducto, Venta, DetalleVenta
-from datetime import datetime
-
 def pagar_compra(request):
     if request.method == "POST":
         productos_carrito = CarritoProducto.objects.all()
@@ -161,7 +156,6 @@ class LoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 def login_html_view(request):
     print("estoy en login_html_view")
     error = None
@@ -180,12 +174,11 @@ def login_html_view(request):
 
     return render(request, 'carro_compra/login.html', {'error': error})
 
+
 @login_required
 def logout_html_view(request):
     logout(request)
     return render(request, 'carro_compra/logout.html')
-
-
 #------------------------------------------------------
 
 
@@ -212,8 +205,6 @@ def registro(request):
     print("estoy en registro.HTML")
     return render(request, "carro_compra/registro.html")
 
-from django.contrib.auth.models import User
-from django.shortcuts import render
 
 def registro(request):
     print("estoy en registro.HTML")
